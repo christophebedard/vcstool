@@ -24,6 +24,7 @@ class ValidateCommand(Command):
         self.url = url
         self.version = version
         self.retry = args.retry
+        self.ensure_https = args.ensure_https
 
 
 def get_parser():
@@ -35,6 +36,9 @@ def get_parser():
     group.add_argument(
         '--retry', type=int, metavar='N', default=2,
         help='Retry commands requiring network access N times on failure')
+    group.add_argument(
+        '--ensure-https', action='store_true', default=False,
+        help='Ensure HTTPS for compatible URLs')
     return parser
 
 

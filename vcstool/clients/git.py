@@ -526,6 +526,16 @@ class GitClient(VcsClientBase):
             output = "Found git repository '%s' with default branch" % \
                 command.url
 
+        if command.ensure_https and command.url.lower().startswith('http://'):
+            output = "Remote git repository '%s' not using HTTPS" % \
+                command.url
+            return {
+                'cmd': cmd,
+                'cwd': self.path,
+                'output': output,
+                'returncode': 1
+            }
+
         return {
             'cmd': cmd,
             'cwd': self.path,
