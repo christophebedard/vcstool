@@ -18,6 +18,9 @@ class Command(object):
         self.hide_empty = args.hide_empty if 'hide_empty' in args else False
         self.nested = args.nested if 'nested' in args else False
         self.output_repos = args.repos if 'repos' in args else False
+        # self.output_repos_posix = args.repos_posix if 'repos_posix' in args else False
+        # self.output_repos = self.output_repos_posix or args.repos if 'repos' in args else False
+        self.force_posix = args.force_posix if 'force_posix' in args else False
         if 'paths' in args:
             self.paths = args.paths
         else:
@@ -62,6 +65,19 @@ def add_common_arguments(
     group.add_argument(
         '--repos', action='store_true', default=False,
         help='List repositories which the command operates on')
+    # group_repos = group.add_mutually_exclusive_group()
+    # group_repos.add_argument(
+    #     '--repos', action='store_true', default=False,
+    #     help='List repositories which the command operates on')
+    # group_repos.add_argument(
+    #     '--repos-posix', action='store_true', default=False,
+    #     help=(
+    #         'List repositories which the command operates on '
+    #         'and use POSIX paths'
+    #     ))
+    group.add_argument(
+        '--force-posix', action='store_true', default=False,
+        help='Force POSIX paths')
     if path_nargs == '?':
         path_help = path_help or 'Base path to look for repositories'
         group.add_argument(
@@ -90,13 +106,13 @@ def simple_main(parser, command_class, args=None):
     command = command_class(args)
     clients = find_repositories(command.paths, nested=command.nested)
     if command.output_repos:
-        output_repositories(clients)
+        output_repositories(clients, command.force_posix)
     jobs = generate_jobs(clients, command)
     results = execute_jobs(
         jobs, show_progress=True, number_of_workers=args.workers,
         debug_jobs=args.debug)
 
-    output_results(results, hide_empty=args.hide_empty)
+    output_results(results, hide_empty=args.hide_empty, force_posix=command.force_posix)
 
     any_error = any(r['returncode'] for r in results)
     return 1 if any_error else 0

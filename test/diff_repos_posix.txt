@@ -1,0 +1,9 @@
+immutable/hash (git)
+immutable/tag (git)
+vcstool (git)
+without_version (git)
+....
+=== immutable/hash (git) ===
+=== immutable/tag (git) ===
+=== vcstool (git) ===
+=== without_version (git) ===

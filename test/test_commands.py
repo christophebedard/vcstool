@@ -1,4 +1,5 @@
 import os
+import platform
 from shutil import which
 import subprocess
 import sys
@@ -79,6 +80,14 @@ class TestCommands(unittest.TestCase):
                 with open(license_path, 'ab') as h:
                     h.truncate(file_length)
 
+        self.assertEqual(output, expected)
+
+    def test_diff_repos_posix(self):
+        if platform.system() != 'Windows':
+            self.skipTest()
+
+        output = run_command('diff', args=['--repos', '--force-posix'])
+        expected = get_expected_output('diff_repos_posix')
         self.assertEqual(output, expected)
 
     def test_export_exact_with_tags(self):

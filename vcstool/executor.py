@@ -1,4 +1,5 @@
 import logging
+import pathlib
 import os
 from queue import Empty, Queue
 import sys
@@ -9,12 +10,13 @@ logger = logging.getLogger(__name__)
 logging.basicConfig()
 
 
-def output_repositories(clients):
+def output_repositories(clients, force_posix=False):
     from vcstool.streams import stdout
     ordered_clients = {client.path: client for client in clients}
     for k in sorted(ordered_clients.keys()):
         client = ordered_clients[k]
-        print('%s (%s)' % (k, client.__class__.type), file=stdout)
+        path = pathlib.Path(k).as_posix() if force_posix else k
+        print('%s (%s)' % (path, client.__class__.type), file=stdout)
 
 
 def generate_jobs(clients, command):
@@ -204,7 +206,7 @@ class Worker(threading.Thread):
             }
 
 
-def output_result(result, hide_empty=False):
+def output_result(result, hide_empty=False, force_posix=False):
     from vcstool.streams import stdout
     output = result['output']
     if hide_empty and result['returncode'] is None:
@@ -221,9 +223,10 @@ def output_result(result, hide_empty=False):
             output = ansi('yellowf') + output + ansi('reset')
     if output or not hide_empty:
         client = result['client']
+        client_path = pathlib.Path(client.path).as_posix() if force_posix else client.path
         print(
             ansi('bluef') + '=== ' +
-            ansi('boldon') + client.path + ansi('boldoff') +
+            ansi('boldon') + client_path + ansi('boldoff') +
             ' (' + client.__class__.type + ') ===' + ansi('reset'),
             file=stdout)
     if output:
@@ -235,13 +238,13 @@ def output_result(result, hide_empty=False):
                 file=stdout)
 
 
-def output_results(results, output_handler=output_result, hide_empty=False):
+def output_results(results, output_handler=output_result, hide_empty=False, force_posix=False):
     # output results in alphabetic order
     path_to_idx = {
         result['client'].path: i for i, result in enumerate(results)}
     idxs_in_order = [path_to_idx[path] for path in sorted(path_to_idx.keys())]
     for i in idxs_in_order:
-        output_handler(results[i], hide_empty=hide_empty)
+        output_handler(results[i], hide_empty=hide_empty, force_posix=force_posix)
 
 
 USE_COLOR = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
