@@ -81,6 +81,14 @@ class TestCommands(unittest.TestCase):
 
         self.assertEqual(output, expected)
 
+    def test_diff_repos_posix(self):
+        if sys.platform != 'win32':
+            self.skipTest()
+
+        output = run_command('diff', args=['--repos'])
+        expected = get_expected_output('diff_repos_posix')
+        self.assertEqual(output, expected)
+
     def test_export_exact_with_tags(self):
         output = run_command(
             'export',
