@@ -386,6 +386,12 @@ def run_command(command, args=None, subfolder=None):
     # replace GitHub SSH clone URL
     output = output.replace(
         b'git@github.com:', b'https://github.com/')
+    # replace Windows leading path separator
+    output = output.replace(b'.\\', b'./')
+    # on Windows, git prints full path to repos
+    # in some messages, so make it relative
+    cwd_abs = os.path.abspath(cwd).replace('\\', '/')
+    output = output.replace(cwd_abs.encode(), b'.')
     return output
 
 
